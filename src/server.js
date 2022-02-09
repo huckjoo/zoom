@@ -19,10 +19,19 @@ const sockets = [];
 // on은 event 발생 기다림, socket을 전달하는데 socket은 서버(나)와 브라우저의 연결
 wss.on('connection', (socket) => {
   sockets.push(socket);
+  socket['nickname'] = 'Anon';
   console.log('Connected to Server ✅'); // 브라우저가 연결되면 무언가 console.log
   socket.on('close', () => console.log('Disconnected to the Browser ❌')); // 브라우저가 꺼지면 console.log
-  socket.on('message', (message) => {
-    sockets.forEach((aSocket) => aSocket.send(message.toString()));
+  socket.on('message', (msg) => {
+    const message = JSON.parse(msg);
+    switch (message.type) {
+      case 'new_message':
+        sockets.forEach((aSocket) =>
+          aSocket.send(`${socket.nickname}: ${message.payload}`),
+        );
+      case 'nickname':
+        socket['nickname'] = message.payload;
+    }
   });
 });
 
