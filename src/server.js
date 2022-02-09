@@ -14,12 +14,15 @@ const handleListen = () => console.log('Listening on http://localhost:3000');
 const server = http.createServer(app);
 const wss = new Websocket.Server({ server });
 
+const sockets = [];
+
 // on은 event 발생 기다림, socket을 전달하는데 socket은 서버(나)와 브라우저의 연결
 wss.on('connection', (socket) => {
+  sockets.push(socket);
   console.log('Connected to Server ✅'); // 브라우저가 연결되면 무언가 console.log
   socket.on('close', () => console.log('Disconnected to the Browser ❌')); // 브라우저가 꺼지면 console.log
   socket.on('message', (message) => {
-    socket.send(message.toString()); // 브라우저에게 받은 메시지 다시 보내줌
+    sockets.forEach((aSocket) => aSocket.send(message.toString()));
   });
 });
 
